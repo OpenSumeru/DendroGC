@@ -1,27 +1,53 @@
 CXX = clang++
 CXXFLAG = -std=c++20
-
-INCLUDEDIR = include
-SRCDIR = src
-OBJDIR = obj
+PCHFLAG = -x c++-header
 
 RM = rm
 
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
-OBJS = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
+INCLUDEDIR = include
+SRCDIR = src
+
+HEADERPPS = $(wildcard $(INCLUDEDIR)/*.hpp) 
+HEADERS = $(wildcard $(INCLUDEDIR)/*.h)
+PCHS = $(patsubst $(INCLUDEDIR)/%.hpp,$(INCLUDEDIR)/%.pch,$(HEADERPPS)) \
+       $(patsubst $(INCLUDEDIR)/%.h,$(INCLUDEDIR)/%.pch,$(HEADERS))
+
+SRCPPS = $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(wildcard $(SRCDIR)/*.c)
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(SRCDIR)/%.o,$(SRCPPS)) \
+       $(patsubst $(SRCDIR)/%.c,$(SRCDIR)/%.o,$(SRCS))
 
 FLAG = $(CXXFLAG) -I$(INCLUDEDIR)
 LINK =
-EXE = main
 
-$(OBJS):$(SRCS)
-	$(CXX) $(FLAG) -c $< -o $@
+LIB = libDendroGC.dll
+EXELINK = -L . -lDendroGC
+EXE = main.exe
+
+%.pch: %.h
+	$(CXX) $(PCHFLAG) $(FLAG) $< -o $@ -Winvalid-pch
+
+%.pch: %.hpp
+	$(CXX) $(PCHFLAG) $(FLAG) $< -o $@ -Winvalid-pch
+
+%.o: %.cpp
+	$(CXX) $(FLAG) -I $(INCLUDEDIR) -c $< -o $@
+
+%.o: %.cpp
+	$(CXX) $(FLAG) -I $(INCLUDEDIR) -c $< -o $@
+
+libDendroGC: $(PCHS) $(OBJS)
+	$(CXX) $(FLAG) -shared $(OBJS) -o $(LIB) $(LINK)
+
+main: main.cpp
+	$(MAKE) libDendroGC
+	$(CXX) $(FLAG) main.cpp $(OBJS) -o $(EXE) $(EXELINK)
 
 clean:
-	$(RM) $(OBJS)
+	- $(RM) $(OBJS)
+	- $(RM) $(PCHS)
+	- $(RM) main.o
 
-libobj: $(OBJS)
-
-
-main: main.cpp $(OBJS)
-	$(CXX) $(FLAG) $^ -o $(EXE) $(LINK)
+clear:
+	- $(MAKE) clean
+	- $(RM) $(EXE)

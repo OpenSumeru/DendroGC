@@ -1,3 +1,4 @@
+#pragma once
 
 #include <atomic>
 #include <deque>
@@ -18,8 +19,8 @@ class GC
 {
 private:
     std::unordered_map<std::thread::id, std::deque<PtrPackage*>> varLists;
-    bool ClearMemory();
 public:
+    bool ClearMemory(std::thread::id id);
     inline std::deque<PtrPackage*>& getListById()
     {
         return varLists[std::this_thread::get_id()];

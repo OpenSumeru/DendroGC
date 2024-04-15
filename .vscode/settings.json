@@ -65,6 +65,7 @@
         "locale": "cpp",
         "stack": "cpp",
         "stop_token": "cpp",
-        "__tree": "cpp"
+        "__tree": "cpp",
+        "clocale": "cpp"
     }
 }

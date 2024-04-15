@@ -15,9 +15,16 @@ GC::~GC()
 
 }
 
-bool GC::ClearMemory()
+bool GC::ClearMemory(std::thread::id id)
 {
-    
+    for (auto& rax : varLists[id])
+    {
+        if (rax->count < 0)
+        {
+            delete rax->ptr; 
+            rax->ptr = nullptr;
+        }
+    }
 }
 
 }
