@@ -1,8 +1,11 @@
-CXX = clang++
+CXX = clang++ #-\#\#\#
 CXXFLAG = -std=c++20
 PCHFLAG = -x c++-header
 
 RM = rm
+CompileFlags = compile_flags.txt
+LIBEXT = .dll
+EXEEXT = .exe
 
 INCLUDEDIR = include
 SRCDIR = src
@@ -30,11 +33,11 @@ EXE = main.exe
 %.pch: %.hpp
 	$(CXX) $(PCHFLAG) $(FLAG) $< -o $@ -Winvalid-pch
 
-%.o: %.cpp
-	$(CXX) $(FLAG) -I $(INCLUDEDIR) -c $< -o $@
+%.o: %.c
+	$(CXX) $(FLAG) -c $< -o $@
 
 %.o: %.cpp
-	$(CXX) $(FLAG) -I $(INCLUDEDIR) -c $< -o $@
+	$(CXX) $(FLAG) -c $< -o $@
 
 libDendroGC: $(PCHS) $(OBJS)
 	$(CXX) $(FLAG) -shared $(OBJS) -o $(LIB) $(LINK)
@@ -43,6 +46,10 @@ main: main.cpp
 	$(MAKE) libDendroGC
 	$(CXX) $(FLAG) main.cpp $(OBJS) -o $(EXE) $(EXELINK)
 
+clangd:
+	echo $(CXXFLAG) > $(CompileFlags)
+	echo -I$(INCLUDEDIR) >> $(CompileFlags)
+
 clean:
 	- $(RM) $(OBJS)
 	- $(RM) $(PCHS)
@@ -50,4 +57,5 @@ clean:
 
 clear:
 	- $(MAKE) clean
+	- $(RM) $(LIB)
 	- $(RM) $(EXE)
